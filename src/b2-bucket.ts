@@ -13,7 +13,15 @@ export default class B2Bucket {
    * them, the "key id" and "application key" are the ones returned when you
    * created the key.
    */
-  async authorize(accountId: string, applicationKey: string, bucketId: string) {
+  async authorize({
+    accountId,
+    applicationKey,
+    bucketId
+  }: {
+    accountId: string;
+    applicationKey: string;
+    bucketId: string;
+  }) {
     this.bucketId = bucketId;
     this.b2 = new B2();
 
@@ -70,7 +78,7 @@ export default class B2Bucket {
 
   // /////////////
   // query and manipulate files
-  listFileNames(opts: {
+  listFileNames(opts?: {
     startFileName?: string;
     maxFileCount?: number;
     delimiter?: string;
@@ -82,7 +90,7 @@ export default class B2Bucket {
     });
   }
 
-  listFileVersions(opts: {
+  listFileVersions(opts?: {
     startFileName?: string;
     startFileId?: string;
     maxFileCount?: number;
@@ -95,15 +103,15 @@ export default class B2Bucket {
     });
   }
 
-  hideFile(fileName: string) {
+  hideFile(opts: { fileName: string }) {
     return this.b2.hideFile({
       bucketId: this.bucketId,
-      fileName
+      ...opts
     });
   }
 
-  getFileInfo(fileId: string) {
-    return this.b2.getFileInfo({ fileId });
+  getFileInfo(opts: { fileId: string }) {
+    return this.b2.getFileInfo(opts);
   }
 
   deleteFileVersion(opts: { fileId: string; fileName: string }) {
