@@ -55,38 +55,30 @@ export default class B2 {
   // buckets
   createBucket(bucketName: string, bucketType: BucketType) {
     return this.axios.post("/b2_create_bucket", {
-      data: {
-        accountId: this.accountId,
-        bucketName: bucketName,
-        bucketType: bucketType
-      }
+      accountId: this.accountId,
+      bucketName: bucketName,
+      bucketType: bucketType
     });
   }
 
   deleteBucket(bucketId: string) {
     return this.axios.post("/b2_delete_bucket", {
-      data: {
-        accountId: this.accountId,
-        bucketId: bucketId
-      }
+      accountId: this.accountId,
+      bucketId: bucketId
     });
   }
 
   listBuckets() {
     return this.axios.post("/b2_list_buckets", {
-      data: {
-        accountId: this.accountId
-      }
+      accountId: this.accountId
     });
   }
 
   updateBucket(bucketId: string, bucketType: BucketType) {
     return this.axios.post("/b2_update_bucket", {
-      data: {
-        accountId: this.accountId,
-        bucketId,
-        bucketType
-      }
+      accountId: this.accountId,
+      bucketId,
+      bucketType
     });
   }
 
@@ -96,10 +88,8 @@ export default class B2 {
     const {
       data: { uploadUrl, authorizationToken }
     } = await this.axios.post<GetUploadUrlResponse>("/b2_get_upload_url", {
-      data: {
-        accountId: this.accountId,
-        bucketId
-      }
+      accountId: this.accountId,
+      bucketId
     });
 
     return {
@@ -130,7 +120,7 @@ export default class B2 {
     const encodedFilename = getUrlEncodedFilename(filename);
 
     // note we use the global rather than instance axios
-    return axios.post(uploadUrl, {
+    return axios.post(uploadUrl, data, {
       headers: {
         Authorization: uploadAuthToken,
         "Content-Type": mime || "b2/x-auto",
@@ -138,7 +128,6 @@ export default class B2 {
         "X-Bz-File-Name": encodedFilename,
         "X-Bz-Content-Sha1": hash || sha1(data)
       },
-      data,
       maxRedirects: 0,
       onUploadProgress
     });
@@ -153,9 +142,7 @@ export default class B2 {
     prefix?: string;
     delimiter?: string;
   }) {
-    return this.axios.post("/b2_list_file_names", {
-      data
-    });
+    return this.axios.post("/b2_list_file_names", data);
   }
 
   listFileVersions(data: {
@@ -166,23 +153,19 @@ export default class B2 {
     prefix?: string;
     delimiter?: string;
   }) {
-    return this.axios.post("/b2_list_file_versions", {
-      data
-    });
+    return this.axios.post("/b2_list_file_versions", data);
   }
 
   hideFile(data: { bucketId: string; fileName: string }) {
-    return this.axios.post("/b2_hide_file", {
-      data
-    });
+    return this.axios.post("/b2_hide_file", data);
   }
 
   getFileInfo(data: { fileId: string }) {
-    return this.axios.post("/b2_get_file_info", { data });
+    return this.axios.post("/b2_get_file_info", data);
   }
 
   deleteFileVersion(data: { fileId: string; fileName: string }) {
-    return this.axios.post("/b2_delete_file_version", { data });
+    return this.axios.post("/b2_delete_file_version", data);
   }
 
   // /////////////
@@ -224,7 +207,7 @@ export default class B2 {
      */
     b2ContentDisposition?: string;
   }) {
-    return this.axios.post("/b2_get_download_authorization", { data });
+    return this.axios.post("/b2_get_download_authorization", data);
   }
 
   // TODO: may need to pass authorization from getDownloadAuthorization
@@ -294,16 +277,14 @@ export default class B2 {
     contentType?: string;
   }) {
     return this.axios.post<StartLargeFileResponse>("/b2_start_large_file", {
-      data: {
-        bucketId,
-        fileName,
-        contentType
-      }
+      bucketId,
+      fileName,
+      contentType
     });
   }
 
   getUploadPartUrl(data: { fileId: string }) {
-    return this.axios.post("/b2_get_upload_part_url", { data });
+    return this.axios.post("/b2_get_upload_part_url", data);
   }
 
   uploadPart({
@@ -320,24 +301,23 @@ export default class B2 {
     data: Buffer;
     onUploadProgress?: (progressEvent: any) => void;
   }) {
-    return axios.post(uploadUrl, {
+    return axios.post(uploadUrl, data, {
       headers: {
         Authorization: uploadAuthToken,
         "Content-Length": data.byteLength || data.length,
         "X-Bz-Part-Number": partNumber,
         "X-Bz-Content-Sha1": sha1(data)
       },
-      data,
       onUploadProgress,
       maxRedirects: 0
     });
   }
 
   finishLargeFile(data: { fileId: string; partSha1Array: string[] }) {
-    return this.axios.post("/b2_finish_large_file", { data });
+    return this.axios.post("/b2_finish_large_file", data);
   }
 
   cancelLargeFile(data: { fileId: string }) {
-    return this.axios.post("/b2_cancel_large_file", { data });
+    return this.axios.post("/b2_cancel_large_file", data);
   }
 }
