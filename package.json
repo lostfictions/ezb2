@@ -1,11 +1,16 @@
 {
   "name": "ezb2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a typed, promise-based api wrapper for backblaze b2.",
-  "keywords": ["backblaze", "b2"],
+  "keywords": [
+    "backblaze",
+    "b2"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "start": "node dist/main.js",
     "dev": "DEBUG=\"backblaze-b2:*\" DEBUG_HIDE_DATE=true DEBUG_COLORS=true ts-node-dev --transpileOnly --notify=false src/main.ts",
