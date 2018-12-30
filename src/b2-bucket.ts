@@ -78,25 +78,29 @@ export default class B2Bucket {
 
   // /////////////
   // query and manipulate files
-  listFileNames(opts?: {
-    startFileName?: string;
-    maxFileCount?: number;
-    delimiter?: string;
-    prefix?: string;
-  }) {
+  listFileNames(
+    opts: {
+      startFileName?: string;
+      maxFileCount?: number;
+      delimiter?: string;
+      prefix?: string;
+    } = {}
+  ) {
     return this.b2.listFileNames({
       bucketId: this.bucketId,
       ...opts
     });
   }
 
-  listFileVersions(opts?: {
-    startFileName?: string;
-    startFileId?: string;
-    maxFileCount?: number;
-    delimiter?: string;
-    prefix?: string;
-  }) {
+  listFileVersions(
+    opts: {
+      startFileName?: string;
+      startFileId?: string;
+      maxFileCount?: number;
+      delimiter?: string;
+      prefix?: string;
+    } = {}
+  ) {
     return this.b2.listFileVersions({
       bucketId: this.bucketId,
       ...opts
