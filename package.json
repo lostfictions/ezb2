@@ -1,6 +1,6 @@
 {
   "name": "ezb2",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "a typed, promise-based api wrapper for backblaze b2.",
   "keywords": [
     "backblaze",
