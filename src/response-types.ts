@@ -99,7 +99,30 @@ export interface GetUploadUrlResponse {
   authorizationToken: string;
 }
 
-export interface StartLargeFileResponse {
+export interface GetDownloadAuthorizationResponse {
+  /**
+   * The identifier for the bucket.
+   */
+  bucketId: string;
+
+  /**
+   *  The prefix for files the authorization token will allow
+   *  `b2_download_file_by_name` to access.
+   */
+  fileNamePrefix: string;
+
+  /**
+   *  The authorization token that can be passed in the Authorization header or
+   *  as an Authorization parameter to `b2_download_file_by_name` to access
+   *  files beginning with the file name prefix.
+   */
+  authorizationToken: string;
+}
+
+/**
+ * Standard file information response shared by several response types.
+ */
+export interface GetFileInfoResponse {
   /**
    * The account that owns the file.
    */
@@ -107,14 +130,11 @@ export interface StartLargeFileResponse {
 
   /**
    * One of "start", "upload", "hide", "folder", or other values added in the
-   * future.
-   *
-   * - "upload" means a file that was uploaded to B2 Cloud Storage.
-   * - "start" means that a large file has been started, but not finished or
-   *    canceled.
-   * - "hide" means a file version marking the file as hidden, so that it will
-   *    not show up in b2_list_file_names.
-   * - "folder" is used to indicate a virtual folder when listing files.
+   * future. "upload" means a file that was uploaded to B2 Cloud Storage.
+   * "start" means that a large file has been started, but not finished or
+   * canceled. "hide" means a file version marking the file as hidden, so that
+   * it will not show up in b2_list_file_names. "folder" is used to indicate a
+   * virtual folder when listing files.
    */
   action: "start" | "upload" | "hide" | "folder";
 
@@ -134,14 +154,14 @@ export interface StartLargeFileResponse {
    * files do not have SHA1 checksums, and the value is "none". The value is
    * null when the action is "hide" or "folder".
    */
-  contentSha1: string;
+  contentSha1?: string;
 
   /**
    * When the action is "upload" or "start", the MIME type of the file, as
    * specified when the file was uploaded. For "hide" action, always
    * "application/x-bz-hide-marker". For "folder" action, always null.
    */
-  contentType: string;
+  contentType?: string;
 
   /**
    * The unique identifier for this version of this file. Used with
@@ -154,10 +174,10 @@ export interface StartLargeFileResponse {
    * The custom information that was uploaded with the file. This is a JSON
    * object, holding the name / value pairs that were uploaded with the file.
    */
-  fileInfo: string;
+  fileInfo: { [key: string]: string };
 
   /**
-   * The name of this file, which can be used with b2_download_file_by_name.
+   * The name of this file, which can be used with `b2_download_file_by_name`.
    */
   fileName: string;
 

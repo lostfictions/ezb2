@@ -43,8 +43,10 @@ export default class B2Bucket {
   // uploads
   async upload(opts: {
     filename: string;
-    data: Buffer /** optional mime type, will default to 'b2/x-auto' if not provided */;
-    mime?: string /** optional data hash, will use sha1(data) if not provided */;
+    data: Buffer;
+    /** optional mime type, will default to 'b2/x-auto' if not provided */
+    mime?: string;
+    /** optional data hash, will use sha1(data) if not provided */
     hash?: string;
     onUploadProgress?: (progressEvent: any) => void;
   }) {
@@ -61,15 +63,17 @@ export default class B2Bucket {
   }
 
   getUploadUrl() {
-    return this.b2.getUploadUrl(this.bucketId);
+    return this.b2.getUploadUrl({ bucketId: this.bucketId });
   }
 
   uploadFile(opts: {
     uploadUrl: string;
     uploadAuthToken: string;
     filename: string;
-    data: Buffer /** optional mime type, will default to 'b2/x-auto' if not provided */;
-    mime?: string /** optional data hash, will use sha1(data) if not provided */;
+    data: Buffer;
+    /** optional mime type, will default to 'b2/x-auto' if not provided */
+    mime?: string;
+    /** optional data hash, will use sha1(data) if not provided */
     hash?: string;
     onUploadProgress?: (progressEvent: any) => void;
   }) {

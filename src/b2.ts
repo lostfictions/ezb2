@@ -1,12 +1,12 @@
 import axios, { AxiosInstance } from "axios";
-import sha1 from "object-hash";
 
-import { getUrlEncodedFilename } from "./util";
+import { getUrlEncodedFilename, sha1 } from "./util";
 import {
   BucketType,
   AuthorizationResponse,
   GetUploadUrlResponse,
-  StartLargeFileResponse
+  GetDownloadAuthorizationResponse,
+  GetFileInfoResponse
 } from "./response-types";
 
 const API_VERSION_URL = "/b2api/v1";
@@ -54,48 +54,46 @@ export default class B2 {
   // /////////////
   // buckets
   createBucket(bucketName: string, bucketType: BucketType) {
-    return this.axios.post("/b2_create_bucket", {
-      accountId: this.accountId,
-      bucketName: bucketName,
-      bucketType: bucketType
-    });
+    return this.axios
+      .post("/b2_create_bucket", {
+        accountId: this.accountId,
+        bucketName: bucketName,
+        bucketType: bucketType
+      })
+      .then(res => res.data);
   }
 
   deleteBucket(bucketId: string) {
-    return this.axios.post("/b2_delete_bucket", {
-      accountId: this.accountId,
-      bucketId: bucketId
-    });
+    return this.axios
+      .post("/b2_delete_bucket", {
+        accountId: this.accountId,
+        bucketId: bucketId
+      })
+      .then(res => res.data);
   }
 
   listBuckets() {
-    return this.axios.post("/b2_list_buckets", {
-      accountId: this.accountId
-    });
+    return this.axios
+      .post("/b2_list_buckets", { accountId: this.accountId })
+      .then(res => res.data);
   }
 
   updateBucket(bucketId: string, bucketType: BucketType) {
-    return this.axios.post("/b2_update_bucket", {
-      accountId: this.accountId,
-      bucketId,
-      bucketType
-    });
+    return this.axios
+      .post("/b2_update_bucket", {
+        accountId: this.accountId,
+        bucketId,
+        bucketType
+      })
+      .then(res => res.data);
   }
 
   // /////////////
   // uploads
-  async getUploadUrl(bucketId: string) {
-    const {
-      data: { uploadUrl, authorizationToken }
-    } = await this.axios.post<GetUploadUrlResponse>("/b2_get_upload_url", {
-      accountId: this.accountId,
-      bucketId
-    });
-
-    return {
-      uploadUrl,
-      authorizationToken
-    };
+  getUploadUrl(data: { bucketId: string }) {
+    return this.axios
+      .post<GetUploadUrlResponse>("/b2_get_upload_url", data)
+      .then(res => res.data);
   }
 
   uploadFile({
@@ -120,17 +118,19 @@ export default class B2 {
     const encodedFilename = getUrlEncodedFilename(filename);
 
     // note we use the global rather than instance axios
-    return axios.post(uploadUrl, data, {
-      headers: {
-        Authorization: uploadAuthToken,
-        "Content-Type": mime || "b2/x-auto",
-        "Content-Length": data.byteLength || data.length,
-        "X-Bz-File-Name": encodedFilename,
-        "X-Bz-Content-Sha1": hash || sha1(data)
-      },
-      maxRedirects: 0,
-      onUploadProgress
-    });
+    return axios
+      .post<GetFileInfoResponse>(uploadUrl, data, {
+        headers: {
+          Authorization: uploadAuthToken,
+          "Content-Type": mime || "b2/x-auto",
+          "Content-Length": data.byteLength || data.length,
+          "X-Bz-File-Name": encodedFilename,
+          "X-Bz-Content-Sha1": hash || sha1(data)
+        },
+        maxRedirects: 0,
+        onUploadProgress
+      })
+      .then(res => res.data);
   }
 
   // /////////////
@@ -142,7 +142,7 @@ export default class B2 {
     prefix?: string;
     delimiter?: string;
   }) {
-    return this.axios.post("/b2_list_file_names", data);
+    return this.axios.post("/b2_list_file_names", data).then(res => res.data);
   }
 
   listFileVersions(data: {
@@ -153,19 +153,27 @@ export default class B2 {
     prefix?: string;
     delimiter?: string;
   }) {
-    return this.axios.post("/b2_list_file_versions", data);
+    return this.axios
+      .post("/b2_list_file_versions", data)
+      .then(res => res.data);
   }
 
   hideFile(data: { bucketId: string; fileName: string }) {
-    return this.axios.post("/b2_hide_file", data);
+    return this.axios
+      .post<GetFileInfoResponse>("/b2_hide_file", data)
+      .then(res => res.data);
   }
 
   getFileInfo(data: { fileId: string }) {
-    return this.axios.post("/b2_get_file_info", data);
+    return this.axios
+      .post<GetFileInfoResponse>("/b2_get_file_info", data)
+      .then(res => res.data);
   }
 
   deleteFileVersion(data: { fileId: string; fileName: string }) {
-    return this.axios.post("/b2_delete_file_version", data);
+    return this.axios
+      .post("/b2_delete_file_version", data)
+      .then(res => res.data);
   }
 
   // /////////////
@@ -207,10 +215,14 @@ export default class B2 {
      */
     b2ContentDisposition?: string;
   }) {
-    return this.axios.post("/b2_get_download_authorization", data);
+    return this.axios
+      .post<GetDownloadAuthorizationResponse>(
+        "/b2_get_download_authorization",
+        data
+      )
+      .then(res => res.data);
   }
 
-  // TODO: may need to pass authorization from getDownloadAuthorization
   downloadFileByName({
     bucketName,
     fileName,
@@ -230,13 +242,12 @@ export default class B2 {
   }) {
     const encodedFileName = getUrlEncodedFilename(fileName);
 
-    return this.axios.get(
-      `${this.downloadUrl}/file/${bucketName}/${encodedFileName}`,
-      {
+    return this.axios
+      .get(`${this.downloadUrl}/file/${bucketName}/${encodedFileName}`, {
         responseType,
         onDownloadProgress
-      }
-    );
+      })
+      .then(res => res.data);
   }
 
   downloadFileById({
@@ -254,15 +265,17 @@ export default class B2 {
       | "stream";
     onDownloadProgress?: (progressEvent: any) => void;
   }) {
-    return this.axios.get(
-      `${
-        this.downloadUrl
-      }${API_VERSION_URL}/b2_download_file_by_id?fileId=${fileId}`,
-      {
-        responseType,
-        onDownloadProgress
-      }
-    );
+    return this.axios
+      .get(
+        `${
+          this.downloadUrl
+        }${API_VERSION_URL}/b2_download_file_by_id?fileId=${fileId}`,
+        {
+          responseType,
+          onDownloadProgress
+        }
+      )
+      .then(res => res.data);
   }
 
   // /////////////
@@ -276,15 +289,19 @@ export default class B2 {
     fileName: string;
     contentType?: string;
   }) {
-    return this.axios.post<StartLargeFileResponse>("/b2_start_large_file", {
-      bucketId,
-      fileName,
-      contentType
-    });
+    return this.axios
+      .post<GetFileInfoResponse>("/b2_start_large_file", {
+        bucketId,
+        fileName,
+        contentType
+      })
+      .then(res => res.data);
   }
 
   getUploadPartUrl(data: { fileId: string }) {
-    return this.axios.post("/b2_get_upload_part_url", data);
+    return this.axios
+      .post("/b2_get_upload_part_url", data)
+      .then(res => res.data);
   }
 
   uploadPart({
@@ -301,23 +318,27 @@ export default class B2 {
     data: Buffer;
     onUploadProgress?: (progressEvent: any) => void;
   }) {
-    return axios.post(uploadUrl, data, {
-      headers: {
-        Authorization: uploadAuthToken,
-        "Content-Length": data.byteLength || data.length,
-        "X-Bz-Part-Number": partNumber,
-        "X-Bz-Content-Sha1": sha1(data)
-      },
-      onUploadProgress,
-      maxRedirects: 0
-    });
+    return axios
+      .post(uploadUrl, data, {
+        headers: {
+          Authorization: uploadAuthToken,
+          "Content-Length": data.byteLength || data.length,
+          "X-Bz-Part-Number": partNumber,
+          "X-Bz-Content-Sha1": sha1(data)
+        },
+        onUploadProgress,
+        maxRedirects: 0
+      })
+      .then(res => res.data);
   }
 
   finishLargeFile(data: { fileId: string; partSha1Array: string[] }) {
-    return this.axios.post("/b2_finish_large_file", data);
+    return this.axios
+      .post<GetFileInfoResponse>("/b2_finish_large_file", data)
+      .then(res => res.data);
   }
 
   cancelLargeFile(data: { fileId: string }) {
-    return this.axios.post("/b2_cancel_large_file", data);
+    return this.axios.post("/b2_cancel_large_file", data).then(res => res.data);
   }
 }
