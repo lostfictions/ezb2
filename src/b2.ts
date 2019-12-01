@@ -267,9 +267,7 @@ export default class B2 {
   }) {
     return this.axios
       .get(
-        `${
-          this.downloadUrl
-        }${API_VERSION_URL}/b2_download_file_by_id?fileId=${fileId}`,
+        `${this.downloadUrl}${API_VERSION_URL}/b2_download_file_by_id?fileId=${fileId}`,
         {
           responseType,
           onDownloadProgress
