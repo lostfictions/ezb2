@@ -1,7 +1,7 @@
 import B2 from "./b2";
 
 /**
- * Simplifies some uses cases when using an application key limited to a single
+ * Simplifies some use-cases when using an application key limited to a single
  * bucket.
  */
 export default class B2Bucket {
